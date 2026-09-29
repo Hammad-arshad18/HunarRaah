@@ -1,0 +1,4 @@
+@extends('public.layout')
+@section('title', 'Credential verification')
+@push('meta')<meta name="robots" content="noindex,nofollow">@endpush
+@section('content')<section class="wrap section reading"><p class="eyebrow">Credential verification</p>@if(!$certificate)<h1>Credential unavailable.</h1><p>This credential is private or unavailable.</p>@elseif($certificate->status !== 'valid')<h1>Credential {{ $certificate->status }}.</h1><p>This credential is not currently valid.</p>@else<h1>Certificate of Completion</h1><div class="credential-preview"><span class="status">Valid</span><h2>{{ $certificate->learner_name }}</h2><h3>{{ $certificate->course_title }}</h3><p>Issued by {{ $certificate->issuer_name }}<br>{{ $certificate->issued_at->timezone($certificate->issued_timezone)->format('j F Y') }}</p><p>Credential ID: {{ $certificate->credential_id }}</p></div>@endif</section>@endsection

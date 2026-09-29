@@ -1,0 +1,17 @@
+[Unit]
+Description=Teaching Studio database queue worker
+After=network.target mysql.service
+[Service]
+User=studio
+Group=www-data
+WorkingDirectory=/srv/studio/current
+ExecStart=/usr/bin/php artisan queue:work database --sleep=3 --tries=5 --timeout=120 --max-time=3600 --memory=256
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=150
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectSystem=full
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,5 @@
+@extends('public.layout')
+@section('title', ucfirst(str_replace('-', ' ', $page)).' · '.config('platform.organization'))
+@section('content')
+<section class="wrap section reading"><p class="eyebrow">{{ config('platform.organization') }}</p><h1>{{ ucfirst(str_replace('-', ' ', $page)) }}</h1>@if($page === 'support')<p>For course, account and access questions, contact our support team.</p>@if(config('platform.support_email'))<a href="mailto:{{ config('platform.support_email') }}">{{ config('platform.support_email') }}</a>@else<p class="note">The owner has not configured a support address yet.</p>@endif @elseif(is_file(resource_path('content/'.$page.'.md')))<div class="prose">{!! \Illuminate\Support\Str::markdown(file_get_contents(resource_path('content/'.$page.'.md')), ['html_input'=>'strip','allow_unsafe_links'=>false]) !!}</div>@else<p class="note">The owner is preparing the approved {{ str_replace('-', ' ', $page) }}. Live sales are disabled until business policies are configured and reviewed.</p>@endif</section>
+@endsection

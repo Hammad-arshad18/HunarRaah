@@ -1,0 +1,63 @@
+name: tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4.6
+        env:
+          MYSQL_ROOT_PASSWORD: test-only-ci-password
+          MYSQL_DATABASE: studio_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping -ptest-only-ci-password" --health-interval=10s --health-timeout=5s --health-retries=10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_mysql, pdo_sqlite, gd, mbstring, intl, zip
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Setup Application
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.25.0 --activate
+          composer install --prefer-dist --no-interaction
+          cp .env.example .env
+          php artisan key:generate
+          pnpm install --frozen-lockfile
+          pnpm run build
+
+      - name: Run CI Checks
+        run: composer ci:check
+
+      - name: MySQL integration tests
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: test-only-ci-password
+        run: php artisan test --configuration=phpunit.mysql.xml

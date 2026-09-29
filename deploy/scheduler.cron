@@ -1,0 +1,1 @@
+* * * * * studio cd /srv/studio/current && /usr/bin/php artisan schedule:run >> /srv/studio/shared/storage/logs/scheduler.log 2>&1
