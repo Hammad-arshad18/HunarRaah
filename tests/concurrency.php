@@ -1,12 +1,5 @@
 <?php
 
-// Standalone destructive harness restricted to the isolated test database.
-require __DIR__.'/../vendor/autoload.php';
-$app = require __DIR__.'/../bootstrap/app.php';
-$app->make(Kernel::class)->bootstrap();
-if (! app()->environment('testing') || config('database.connections.mysql.database') !== 'studio_test' || config('database.default') !== 'mysql') {
-    throw new RuntimeException('Isolated MySQL test database required');
-}
 use App\Actions\CompleteLesson;
 use App\Actions\GrantEnrollment;
 use App\Actions\IssueCertificate;
@@ -18,6 +11,15 @@ use App\Models\Order;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
+
+
+// Standalone destructive harness restricted to the isolated test database.
+require __DIR__.'/../vendor/autoload.php';
+$app = require __DIR__.'/../bootstrap/app.php';
+$app->make(Kernel::class)->bootstrap();
+if (! app()->environment('testing') || config('database.connections.mysql.database') !== 'studio_test' || config('database.default') !== 'mysql') {
+    throw new RuntimeException('Isolated MySQL test database required');
+}
 
 $mode = $argv[1] ?? '';
 if ($mode === 'prepare') {

@@ -1,4 +1,3 @@
-import { useHttp } from '@inertiajs/react';
 import { useCallback, useState } from 'react';
 import { qrCode, recoveryCodes, secretKey } from '@/routes/two-factor';
 
@@ -20,7 +19,19 @@ export type UseTwoFactorAuthReturn = {
 export const OTP_MAX_LENGTH = 6;
 
 export const useTwoFactorAuth = (): UseTwoFactorAuthReturn => {
-    const { submit } = useHttp();
+    const submit = useCallback(
+        async ({ url }: { url: string }): Promise<unknown> => {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                headers: { Accept: 'application/json' },
+                cache: 'no-store',
+            });
+            if (!response.ok)
+                throw new Error('Unable to load authentication setup.');
+            return response.json();
+        },
+        [],
+    );
 
     const [qrCodeSvg, setQrCodeSvg] = useState<string | null>(null);
     const [manualSetupKey, setManualSetupKey] = useState<string | null>(null);

@@ -13,18 +13,15 @@ class Lesson extends Model
     protected $hidden = ['video_uid'];
 
     /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return ['required' => 'boolean', 'published' => 'boolean'];
-    }
+    protected $casts = ['required' => 'boolean', 'published' => 'boolean'];
 
-    /** @return BelongsTo<Module, $this> */
+    /** @return BelongsTo<Module, Lesson> */
     public function module(): BelongsTo
     {
         return $this->belongsTo(Module::class);
     }
 
-    /** @return HasOne<LiveSession, $this> */
+    /** @return HasOne<LiveSession> */
     public function session(): HasOne
     {
         return $this->hasOne(LiveSession::class);

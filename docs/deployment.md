@@ -2,7 +2,7 @@
 
 ## Owner gate
 
-Do not launch until `launch-checklist.md` is complete. Local checks are not proof of payment, video, mail delivery, accessibility, capacity or recoverability in production. Choose a supported Ubuntu LTS, PHP 8.4, MySQL 8.4 and Nginx. The app has one server failure domain; Stream and SMTP are external. No persistent Node server is required.
+Do not launch until `launch-checklist.md` is complete. Local checks are not proof of payment, video, mail delivery, accessibility, capacity or recoverability in production. Choose a supported Ubuntu LTS, owner-required PHP 8.1, MySQL 8.4 and Nginx. The app has one server failure domain; Stream and SMTP are external. No persistent Node server is required.
 
 ## First installation
 
@@ -29,3 +29,5 @@ Stream: owned private videos, required signed URLs, allowed origins matching pro
 SMTP: authenticated transactional sender, SPF/DKIM/DMARC and delivery/bounce monitoring. Configure provider budgets externally. No real email or live payment was enabled during implementation.
 
 Supply reviewed UTF-8 Markdown in `resources/content/terms.md`, `privacy.md` and `refund-policy.md`. Set a real `TERMS_VERSION` and `POLICIES_APPROVED=true` only after review. Production registration and live payments fail closed while these prerequisites are missing.
+
+The owner-requested Laravel 10/PHP 8.1 baseline is beyond upstream security support. Do not interpret a successful deployment or green tests as resolving the framework advisories. A maintained security patch strategy is a separate launch prerequisite.

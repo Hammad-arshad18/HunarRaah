@@ -1,14 +1,14 @@
 # Teaching Studio
 
-A single-organization Laravel 13 / React 19 / Inertia 3 course application. Public discovery uses Blade. Course access, payment reconciliation, progress and certificates are server-controlled. Local implementation and automated verification are available; this is not approved for live launch. See `docs/test-report.md` and `docs/launch-checklist.md`.
+A single-organization Laravel 10 / React 19 / Inertia 2 course application. Public discovery uses Blade. Course access, payment reconciliation, progress and certificates are server-controlled. Local implementation and automated verification are available; this is not approved for live launch. See `docs/test-report.md` and `docs/launch-checklist.md`.
 
 ## Requirements
 
-- PHP 8.4 with curl, fileinfo, mbstring, openssl, PDO MySQL, GD, zip, DOM/XML.
+- PHP 8.1+ with curl, fileinfo, mbstring, openssl, PDO MySQL, GD, zip, DOM/XML.
 - Composer 2; Node 22.12+; pnpm 11.25.0.
 - MySQL 8.4 for deployment and integration verification.
 
-The Windows system PHP 8.1 is incompatible. This workspace has a checksum-verified portable PHP under `.tools/php`, ignored by Git. On this machine replace `php` with `.tools/php/php.exe` and run Composer through `.tools/php/php.exe C:/composer/composer.phar`.
+Use the system `php` on PATH. On this machine it is `C:\xampp\php\php.exe` (8.1.25); run Composer with `php C:/composer/composer.phar`. The owner requires Laravel 10 and system PHP; see `MEMORY.MD`. Do not use the previous workspace-local runtime. Laravel 10/PHP 8.1 are past upstream security support; dependency audit findings remain launch blockers.
 
 ## Local setup
 

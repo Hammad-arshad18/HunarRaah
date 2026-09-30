@@ -3,6 +3,7 @@ export default defineConfig({
     testDir: './tests/Browser',
     fullyParallel: false,
     workers: 1,
+    expect: { timeout: 15000 },
     reporter: [
         ['list'],
         ['html', { open: 'never', outputFolder: '.tools/playwright-report' }],

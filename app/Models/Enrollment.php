@@ -16,24 +16,21 @@ class Enrollment extends Model
     protected $guarded = ['id'];
 
     /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return ['access_ends_at' => 'datetime', 'granted_at' => 'datetime', 'completed_at' => 'datetime'];
-    }
+    protected $casts = ['access_ends_at' => 'datetime', 'granted_at' => 'datetime', 'completed_at' => 'datetime'];
 
-    /** @return BelongsTo<Course, $this> */
+    /** @return BelongsTo<Course, Enrollment> */
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User, Enrollment> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /** @return HasMany<LessonProgress, $this> */
+    /** @return HasMany<LessonProgress> */
     public function progress(): HasMany
     {
         return $this->hasMany(LessonProgress::class);

@@ -1,4 +1,4 @@
-import { Form, Head, setLayoutProps } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { useMemo, useState } from 'react';
 import InputError from '@/components/input-error';
@@ -38,11 +38,6 @@ export default function TwoFactorChallenge() {
         };
     }, [showRecoveryInput]);
 
-    setLayoutProps({
-        title: authConfigContent.title,
-        description: authConfigContent.description,
-    });
-
     const toggleRecoveryMode = (clearErrors: () => void): void => {
         setShowRecoveryInput(!showRecoveryInput);
         clearErrors();
@@ -54,6 +49,8 @@ export default function TwoFactorChallenge() {
             <Head title="Two-factor authentication" />
 
             <div className="space-y-6">
+                <h1>{authConfigContent.title}</h1>
+                <p>{authConfigContent.description}</p>
                 <Form
                     {...store.form()}
                     className="space-y-4"

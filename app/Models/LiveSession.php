@@ -17,12 +17,9 @@ class LiveSession extends Model
     protected $hidden = ['join_url'];
 
     /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return ['join_url' => 'encrypted', 'starts_at' => 'datetime', 'ends_at' => 'datetime'];
-    }
+    protected $casts = ['join_url' => 'encrypted', 'starts_at' => 'datetime', 'ends_at' => 'datetime'];
 
-    /** @return BelongsTo<Lesson, $this> */
+    /** @return BelongsTo<Lesson, LiveSession> */
     public function lesson(): BelongsTo
     {
         return $this->belongsTo(Lesson::class);

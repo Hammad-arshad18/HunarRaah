@@ -10,19 +10,19 @@ class Order extends Model
 {
     protected $guarded = ['id'];
 
-    /** @return HasOne<PaymentAttempt, $this> */
+    /** @return HasOne<PaymentAttempt> */
     public function attempt(): HasOne
     {
         return $this->hasOne(PaymentAttempt::class);
     }
 
-    /** @return BelongsTo<User, $this> */
+    /** @return BelongsTo<User, Order> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /** @return BelongsTo<Course, $this> */
+    /** @return BelongsTo<Course, Order> */
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);

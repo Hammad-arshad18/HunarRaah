@@ -1,10 +1,17 @@
 # Implementation decisions
 
-## 2026-09-30
+## 2026-09-30 — owner version instruction
+
+- The owner explicitly requested Laravel 10 and the existing system PHP, superseding the original Laravel 13/portable PHP decision. Preferences are saved in `MEMORY.MD`.
+- Use PHP 8.1.25 from `C:\xampp\php\php.exe`, Laravel 10.50.3, compatible Fortify/Inertia 2 and PHPUnit 10. Composer resolves against the actual runtime without ignoring platform requirements.
+- Framework bootstrapping uses HTTP/console kernels, explicit providers, Blade Inertia directives and property-based model casts. Job traits use the Laravel 10 equivalents. Course/payment/progress/credential data is preserved.
+- Wayfinder and the newer starter-kit installer/passkey scaffolding require newer framework/PHP APIs and are removed. Explicit auth/settings route helpers and standard Inertia 2 initialization replace them; admin TOTP remains required.
+- Lockfiles are regenerated and CI/deployment documentation targets PHP 8.1. No global PHP configuration or PATH is changed.
+- Laravel 10 and PHP 8.1 are past upstream security support. Composer reported four advisories affecting the framework; the local version change used a one-time `--no-security-blocking` resolution flag. Auditing remains enabled; no global ignore policy or platform bypass is configured. See `docs/test-report.md` for details.
+
+## Unchanged product defaults
 
 - The workspace initially contained only AGENTS.md and GEMINI.md. Preserve both.
-- Use Laravel 13 with PHP 8.4, React 19, TypeScript and Inertia 3 from the official React starter kit, source revision `717b8f55aefd82d25d4119eaebdc8e3a72b8d7e5`. The specification's Laravel 10 recommendation conflicts with its maintained-release requirement. Laravel 10 is unsupported; Laravel 13 requires PHP 8.3 or newer. References: https://laravel.com/docs/13.x/releases and https://laravel.com/starter-kits.
-- Resolve dependencies once and retain lockfiles. Workspace-local PHP 8.4.26 was downloaded from windows.php.net and verified against its published SHA-256. Existing system PHP is 8.1.25 and must not run this app.
 - One organization, AED, Asia/Dubai; merchant country remains unset. No live payments until explicitly configured and approved.
 - Database-backed queues, cache and sessions. MySQL is the deployment/integration target; SQLite is permitted only for fast local tests, never evidence of MySQL concurrency correctness.
 - Local mail logs only. No production demo users, legal policies, biographies or courses. Development content is explicitly labelled.

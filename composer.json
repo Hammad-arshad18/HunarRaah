@@ -9,26 +9,21 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.4",
+        "php": "^8.1",
         "barryvdh/laravel-dompdf": "^3.1",
-        "inertiajs/inertia-laravel": "^3.0",
-        "laravel/chisel": "^0.1.0",
-        "laravel/fortify": "^1.37.2",
-        "laravel/framework": "^13.17",
-        "laravel/tinker": "^3.0",
-        "laravel/wayfinder": "^0.1.14",
+        "inertiajs/inertia-laravel": "^2.0",
+        "laravel/fortify": "^1.24",
+        "laravel/framework": "^10.48",
+        "laravel/tinker": "^2.9",
         "stripe/stripe-php": "^19.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",
-        "larastan/larastan": "^3.9",
-        "laravel/pail": "^1.2.5",
-        "laravel/pao": "^1.0.6",
-        "laravel/pint": "^1.27",
-        "laravel/sail": "^1.53",
+        "larastan/larastan": "^2.11",
+        "laravel/pint": "^1.13",
         "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.9.3",
-        "phpunit/phpunit": "^12.5.23"
+        "nunomaduro/collision": "^7.12",
+        "phpunit/phpunit": "^10.5"
     },
     "autoload": {
         "psr-4": {
@@ -53,7 +48,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan dev"
+            "pnpm exec concurrently -k \"php artisan serve --host=127.0.0.1 --port=8000\" \"php artisan queue:work --tries=5\" \"pnpm run dev\""
         ],
         "lint": [
             "pint --parallel"
@@ -89,22 +84,13 @@
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi",
             "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
+            "@php artisan migrate --ansi"
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
         ]
     },
-    "extra": {
-        "laravel": {
-            "dont-discover": [],
-            "installer": {
-                "post-create-project": [
-                    "@php artisan install:features --ansi"
-                ]
-            }
-        }
-    },
+    "extra": {},
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",

@@ -14,8 +14,5 @@ class WebhookEvent extends Model
     protected $hidden = ['payload'];
 
     /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return ['payload' => 'encrypted:array'];
-    }
+    protected $casts = ['payload' => 'encrypted:array'];
 }

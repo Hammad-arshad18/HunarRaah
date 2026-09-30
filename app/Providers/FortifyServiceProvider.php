@@ -76,7 +76,7 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
             'email' => $request->email,
             'token' => $request->route('token'),
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'passwordRules' => 'minlength:12; maxlength:128',
         ]));
 
         Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/forgot-password', [
@@ -91,7 +91,7 @@ class FortifyServiceProvider extends ServiceProvider
 
         /* @chisel-registration */
         Fortify::registerView(fn () => Inertia::render('auth/register', [
-            'passwordRules' => Password::defaults()->toPasswordRulesString(),
+            'passwordRules' => 'minlength:12; maxlength:128',
         ]));
         /* @end-chisel-registration */
 
@@ -120,13 +120,5 @@ class FortifyServiceProvider extends ServiceProvider
 
             return [Limit::perMinute(5)->by($throttleKey), Limit::perMinute(30)->by($request->ip())];
         });
-
-        /* @chisel-passkeys */
-        RateLimiter::for('passkeys', function (Request $request) {
-            return Limit::perMinute(10)->by(
-                ($request->input('credential.id') ?: $request->session()->getId()).'|'.$request->ip(),
-            );
-        });
-        /* @end-chisel-passkeys */
     }
 }

@@ -15,8 +15,5 @@ class LessonProgress extends Model
     protected $guarded = ['id'];
 
     /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return ['completed_at' => 'datetime'];
-    }
+    protected $casts = ['completed_at' => 'datetime'];
 }

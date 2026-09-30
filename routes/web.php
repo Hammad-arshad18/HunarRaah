@@ -12,6 +12,7 @@ use App\Models\Course;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [CatalogController::class, 'home'])->name('home');
+Route::get('/up', fn () => response()->json(['status' => 'ok']));
 Route::get('/sitemap.xml', fn () => response()->view('public.sitemap', ['courses' => Course::where('status', 'published')->where('sales_visible', true)->whereNull('takedown_reason')->select('slug')->get()])->header('Content-Type', 'application/xml'));
 Route::get('/courses', [CatalogController::class, 'index'])->name('courses.index');
 Route::get('/courses/{slug}', [CatalogController::class, 'show'])->name('courses.show');

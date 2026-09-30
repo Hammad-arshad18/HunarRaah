@@ -15,12 +15,9 @@ class PaymentAttempt extends Model
     protected $guarded = ['id'];
 
     /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return ['expires_at' => 'datetime', 'last_reconciled_at' => 'datetime'];
-    }
+    protected $casts = ['expires_at' => 'datetime', 'last_reconciled_at' => 'datetime'];
 
-    /** @return BelongsTo<Order, $this> */
+    /** @return BelongsTo<Order, PaymentAttempt> */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

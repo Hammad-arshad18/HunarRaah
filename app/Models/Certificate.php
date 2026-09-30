@@ -18,12 +18,9 @@ class Certificate extends Model
     protected $hidden = ['private_pdf_path', 'verification_token'];
 
     /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return ['issued_at' => 'datetime', 'public_enabled_at' => 'datetime'];
-    }
+    protected $casts = ['issued_at' => 'datetime', 'public_enabled_at' => 'datetime'];
 
-    /** @return BelongsTo<Enrollment, $this> */
+    /** @return BelongsTo<Enrollment, Certificate> */
     public function enrollment(): BelongsTo
     {
         return $this->belongsTo(Enrollment::class);

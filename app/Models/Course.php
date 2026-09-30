@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Carbon\CarbonInterface;
-use Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,30 +14,26 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
  */
 class Course extends Model
 {
-    /** @use HasFactory<CourseFactory> */
     use HasFactory;
 
     protected $guarded = ['id'];
 
     /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return ['outcomes' => 'array', 'sales_visible' => 'boolean', 'certificate_enabled' => 'boolean', 'recording_alternative' => 'boolean', 'accessible_content_confirmed' => 'boolean', 'enrollment_deadline' => 'datetime'];
-    }
+    protected $casts = ['outcomes' => 'array', 'sales_visible' => 'boolean', 'certificate_enabled' => 'boolean', 'recording_alternative' => 'boolean', 'accessible_content_confirmed' => 'boolean', 'enrollment_deadline' => 'datetime'];
 
-    /** @return HasMany<Module, $this> */
+    /** @return HasMany<Module> */
     public function modules(): HasMany
     {
         return $this->hasMany(Module::class)->orderBy('position')->orderBy('id');
     }
 
-    /** @return HasManyThrough<Lesson, Module, $this> */
+    /** @return HasManyThrough<Lesson> */
     public function lessons(): HasManyThrough
     {
         return $this->hasManyThrough(Lesson::class, Module::class);
     }
 
-    /** @return HasMany<Enrollment, $this> */
+    /** @return HasMany<Enrollment> */
     public function enrollments(): HasMany
     {
         return $this->hasMany(Enrollment::class);

@@ -10,13 +10,13 @@ class Module extends Model
 {
     protected $guarded = ['id'];
 
-    /** @return BelongsTo<Course, $this> */
+    /** @return BelongsTo<Course, Module> */
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
     }
 
-    /** @return HasMany<Lesson, $this> */
+    /** @return HasMany<Lesson> */
     public function lessons(): HasMany
     {
         return $this->hasMany(Lesson::class)->orderBy('position')->orderBy('id');

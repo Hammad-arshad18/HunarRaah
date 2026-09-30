@@ -39,6 +39,14 @@ class PlatformTest extends TestCase
         $this->post('/register', ['name' => 'Student', 'email' => 'new@example.com', 'password' => 'a-long-test-password', 'password_confirmation' => 'a-long-test-password'])->assertSessionHasErrors('terms');
     }
 
+    public function test_email_control_characters_are_rejected_before_registration_and_reset(): void
+    {
+        $email = "student@example.test\r\nBcc: injected@example.test";
+        $this->post('/register', ['name' => 'Student', 'email' => $email, 'password' => 'a-long-test-password', 'password_confirmation' => 'a-long-test-password', 'terms' => true])->assertSessionHasErrors('email');
+        $this->post('/forgot-password', ['email' => $email])->assertSessionHasErrors('email');
+        $this->assertDatabaseCount('users', 0);
+    }
+
     public function test_signed_webhook_delivery_is_durable_and_deduplicated(): void
     {
         Queue::fake();
