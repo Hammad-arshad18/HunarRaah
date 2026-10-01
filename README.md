@@ -1,4 +1,4 @@
-# Teaching Studio
+# HunarRaah
 
 A single-organization Laravel 10 / React 19 / Inertia 2 course application, with Filament 3.3.55 administration. Public discovery uses Blade. Course access, payment reconciliation, progress and certificates are server-controlled. Tests are currently paused at the owner's request; the latest authentication and UI edits await verification. See `docs/test-report.md` and `docs/launch-checklist.md`.
 
