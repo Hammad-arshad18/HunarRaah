@@ -1,5 +1,9 @@
 # Verification report — updated 1 October 2026
 
+## Workflow removal and added Laravel coverage
+
+GitHub Actions CI/CD and its Actions-only Dependabot configuration were removed at the owner's request. Added three local feature cases in `tests/Feature/PublicDiscoveryTest.php`: exclude draft/archived/hidden/taken-down courses from discovery and direct public access; keep unpublished lessons, lesson bodies, video identifiers and meeting secrets out of public previews; preserve public discovery for published courses after enrollment closes. These cases use the existing `RefreshDatabase` test setup and course factory. They have **not been executed**; test execution remains paused. No production or local application database was modified.
+
 The application runs locally. It is **not approved for production launch**. Tests are currently paused at the owner's explicit request. Final sign-in/logout, administrator onboarding, enhanced controls, spacing, shared light/dark-theme edits and the scroll-animated homepage have not been tested. This report distinguishes historical executed checks from fixtures and untested services.
 
 ## Three.js homepage delivery — 1 October 2026
@@ -59,6 +63,6 @@ Email was written to local logs only. SMTP delivery, DNS authentication, bounces
 
 Supply real organization/course/instructor material, reviewed Markdown policies, merchant/tax decisions and provider credentials. Complete actual provider smoke tests; full admin browser journeys including MFA/media/attendance/reissue; long-name and full required Unicode PDF checks; 768/1440px and 200% zoom testing; manual WCAG 2.2 AA and automated accessibility audit; dependency advisory checks with fresh network data; staging performance benchmark; Linux deployment, encrypted off-server backup restore and rollback drills.
 
-CI configuration is supplied but has not run on a remote CI host. Local MySQL concurrency is evidence of transaction behavior, not a capacity guarantee or real payment-provider race test. The encrypted backup script has not run against a configured remote. A single rendered PDF does not establish support for every Unicode script.
+GitHub Actions CI/CD configuration has been removed at the owner's request. Local MySQL concurrency is evidence of transaction behavior, not a capacity guarantee or real payment-provider race test. The encrypted backup script has not run against a configured remote. A single rendered PDF does not establish support for every Unicode script.
 
 Use `launch-checklist.md` as the owner launch gate. Historical text/XML output remains in ignored `.tools/`; generated browser reports and screenshots were removed during the owner-requested repository cleanup. Repeatable tests live under `tests/`. Cleanup did not rerun tests.
