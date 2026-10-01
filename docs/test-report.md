@@ -1,6 +1,16 @@
 # Verification report — updated 1 October 2026
 
-The application runs locally. It is **not approved for production launch**. Tests are currently paused at the owner's explicit request. Final sign-in/logout, administrator onboarding, enhanced controls, spacing and shared light/dark-theme edits have not been tested. This report distinguishes historical executed checks from fixtures and untested services.
+The application runs locally. It is **not approved for production launch**. Tests are currently paused at the owner's explicit request. Final sign-in/logout, administrator onboarding, enhanced controls, spacing, shared light/dark-theme edits and the scroll-animated homepage have not been tested. This report distinguishes historical executed checks from fixtures and untested services.
+
+## Three.js homepage delivery — 1 October 2026
+
+The production asset build (`pnpm run build`) succeeds with the full scroll-animated homepage and deferred Three.js scene (2,475 modules). After the additional pointer/path/ribbon effects, initial homepage JavaScript is about 6.9 KB / 2.7 KB gzip (plus Vite's shared preload helper), its CSS is about 19.1 KB / 4.3 KB gzip, and the deferred scene including Three.js is about 538 KB / 135 KB gzip. Vite emits its default >500 KB chunk warning; it is not suppressed. The scene is dynamically imported only by the homepage. Full-page motion uses native browser APIs without another animation dependency.
+
+No tests, lint, TypeScript checks, HTTP checks or browser validation were run for this change under the owner's pause. Still to verify when authorized: light/dark/system appearance, 360/768/1280/1440px layouts, touch scrolling/drag, keyboard rotation/pause, reduced-motion changes, 200% zoom, data saving, blocked JavaScript/chunk failures, disabled WebGL/context loss, hidden/offscreen suspension, back/forward restore and real low-end-device frame times. The fallback and resource lifecycle are implemented, not yet browser-verified.
+
+Also verify the expanded page's sticky chapter transitions, reveal cancellation on keyboard focus, native FAQ and course navigation, tab-scoped motion switch and its synchronization with Three.js, short-screen sticky fallback, native anchor navigation and reveal behavior after browser back/forward restoration. No visual/performance result is claimed from compilation alone.
+
+The added decorative word ribbon, SVG path marker, chapter jump links, fine-pointer course-art tilt and local spotlights have compiled but remain browser-unverified. Include touch exclusion, motion-off, keyboard focus cleanup, pointer exit/blur and active chapter links in the next owner-authorized check.
 
 ## Filament migration evidence before the testing pause
 
