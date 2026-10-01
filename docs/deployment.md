@@ -8,6 +8,12 @@ Do not launch until `launch-checklist.md` is complete. Local checks are not proo
 
 Provision a non-root deploy user and least-privilege MySQL account; bind MySQL to localhost. Permit HTTP/HTTPS and restrict SSH. Configure TLS and owner domain. Install PHP extensions from README. Set Nginx root to the release's `public` directory using `deploy/nginx.conf`. Never serve the repository root.
 
+Filament requires PHP `intl`. The locked Composer post-install/autoload scripts run `filament:upgrade`; ship the resulting `public/css/filament` and `public/js/filament` assets with each release. Also ship `admin-studio.css`, `admin-ui.js`, the local font and Vite build artifacts. Review the trusted Filament Blade overrides under `resources/views/vendor` when updating the package: their script nonces support the production CSP. Alpine's required evaluation permission is restricted to admin/Livewire responses; public/student responses retain the stricter policy.
+
+Never run `AdministratorSeeder` in production or copy `storage/app/private/admin-bootstrap.txt` to deployment. Bootstrap with `php artisan platform:admin`, complete `/admin/setup` and save recovery codes securely.
+
+Ship `public/theme.css` and `public/theme.js` with every release. All three application surfaces include them through `resources/views/shared/theme.blade.php`; semantic Tailwind and Filament colours depend on this shared palette. Public stylesheet URLs include their file modification version to refresh browser caches after a release.
+
 Store `.env` and `storage/` outside immutable releases and symlink them. Generate APP_KEY once and preserve it in encrypted recovery storage. Set APP_ENV=production, APP_DEBUG=false, APP_URL=https://owner-domain, SESSION_SECURE_COOKIE=true, SESSION_ENCRYPT=true, database cache/session/queue drivers and transactional SMTP. Configure owner organization/issuer/signatory/support/currency/timezone. Never expose secrets as VITE variables.
 
 Run `composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader` from lockfile. Build `pnpm install --frozen-lockfile && pnpm run build` in CI and ship public/build plus public/fonts and license. Configure writable storage/bootstrap cache permissions for deploy and FPM users, never world-writable.

@@ -13,23 +13,65 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class AdminCourseController extends Controller
 {
-    public function index(Request $request): Response
-    {
-        $filters = $request->validate(['status' => 'nullable|in:draft,published,archived']);
-
-        return Inertia::render('studio/admin', ['courses' => Course::when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))->orderByDesc('id')->paginate(20)->withQueryString(), 'filters' => $filters]);
-    }
-
-    public function edit(Course $course): Response
+    public function reviseModule(Request $request, Course $course, Module $module): RedirectResponse
     {
         Gate::authorize('update', $course);
+        abort_unless($module->course_id === $course->id, 404);
+        $data = $request->validate(['title' => 'required|string|max:200', 'position' => 'required|integer|min:1', 'reason' => 'required|string|max:1000']);
+        DB::transaction(function () use ($request, $course, $module, $data) {
+            $c = Course::whereKey($course->id)->lockForUpdate()->firstOrFail();
+            abort_if($c->enrollments()->exists() && $module->position != $data['position'], 409, 'Module order is locked after enrollment.');
+            $module->update(['title' => $data['title'], 'position' => $data['position']]);
+            $this->audit($request, $course, 'module.updated');
+        });
 
-        return Inertia::render('studio/course-editor', ['course' => $course->load('modules.lessons'), 'locked' => $course->enrollments()->exists()]);
+        return back()->with('toast', ['type' => 'success', 'message' => 'Chapter saved.']);
+    }
+
+    public function removeModule(Request $request, Course $course, Module $module): RedirectResponse
+    {
+        Gate::authorize('update', $course);
+        abort_unless($module->course_id === $course->id, 404);
+        $request->validate(['reason' => 'required|string|max:1000']);
+        DB::transaction(function () use ($request, $course, $module) {
+            $c = Course::whereKey($course->id)->lockForUpdate()->firstOrFail();
+            abort_if($c->enrollments()->exists(), 409, 'Enrolled curriculum cannot be deleted.');
+            abort_if($module->lessons()->exists(), 409, 'Remove the lessons before deleting this chapter.');
+            $module->delete();
+            $this->audit($request, $course, 'module.deleted');
+        });
+
+        return back();
+    }
+
+    public function removeLesson(Request $request, Course $course, Lesson $lesson): RedirectResponse
+    {
+        Gate::authorize('update', $course);
+        abort_unless($lesson->module->course_id === $course->id, 404);
+        $request->validate(['reason' => 'required|string|max:1000']);
+        DB::transaction(function () use ($request, $course, $lesson) {
+            $c = Course::whereKey($course->id)->lockForUpdate()->firstOrFail();
+            abort_if($c->enrollments()->exists(), 409, 'Enrolled lessons cannot be deleted.');
+            $lesson->session()->delete();
+            $lesson->delete();
+            $this->audit($request, $course, 'lesson.deleted');
+        });
+
+        return back();
+    }
+
+    public function availability(Request $request, Course $course): RedirectResponse
+    {
+        Gate::authorize('update', $course);
+        $data = $request->validate(['sales_visible' => 'required|boolean', 'takedown_reason' => 'nullable|string|max:1000', 'reason' => 'required|string|max:1000']);
+        abort_if($data['sales_visible'] && $course->status !== 'published', 409, 'Publish the course before enabling sales.');
+        $course->update(['sales_visible' => $data['sales_visible'], 'takedown_reason' => $data['takedown_reason'] ?: null]);
+        $this->audit($request, $course, 'course.availability');
+
+        return back()->with('toast', ['type' => 'success', 'message' => 'Availability updated.']);
     }
 
     public function store(CourseRequest $request): RedirectResponse
@@ -56,7 +98,7 @@ class AdminCourseController extends Controller
             $this->audit($request, $course, 'course.updated');
         });
 
-        return back();
+        return back()->with('toast', ['type' => 'success', 'message' => 'Course details saved.']);
     }
 
     public function module(Request $request, Course $course): RedirectResponse
@@ -140,7 +182,9 @@ class AdminCourseController extends Controller
                 foreach (['required', 'type', 'position', 'published'] as $key) {
                     abort_if($data[$key] != $lesson->$key, 409, 'Curriculum structure is locked after enrollment.');
                 }
-            }if ($data['published'] && $data['type'] === 'video') {
+            }
+            abort_if($data['published'] && $data['type'] === 'text' && ! trim($data['body'] ?? ''), 422, 'A published text lesson needs content.');
+            if ($data['published'] && $data['type'] === 'video') {
                 abort_unless($lesson->video_status === 'ready', 422, 'Recording must be ready.');
             }if ($data['published'] && $data['type'] === 'live') {
                 abort_unless($lesson->session !== null, 422, 'Schedule a live session first.');
@@ -194,6 +238,6 @@ class AdminCourseController extends Controller
 
     private function audit(Request $request, Course $course, string $action): void
     {
-        DB::table('audit_logs')->insert(['actor_id' => $request->user()->id, 'action' => $action, 'subject_type' => 'course', 'subject_id' => $course->id, 'created_at' => now()]);
+        DB::table('audit_logs')->insert(['actor_id' => $request->user()->id, 'action' => $action, 'subject_type' => 'course', 'subject_id' => $course->id, 'reason' => $request->input('reason'), 'created_at' => now()]);
     }
 }

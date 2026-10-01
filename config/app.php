@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'providers' => Illuminate\Support\ServiceProvider::defaultProviders()->merge([App\Providers\AppServiceProvider::class, App\Providers\FortifyServiceProvider::class, App\Providers\EventServiceProvider::class, App\Providers\RouteServiceProvider::class])->toArray(),
+    'providers' => Illuminate\Support\ServiceProvider::defaultProviders()->merge([App\Providers\AppServiceProvider::class, App\Providers\Filament\AdminPanelProvider::class, App\Providers\FortifyServiceProvider::class, App\Providers\EventServiceProvider::class, App\Providers\RouteServiceProvider::class])->toArray(),
     'aliases' => Illuminate\Support\Facades\Facade::defaultAliases()->toArray(),
 
     /*

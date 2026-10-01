@@ -1,12 +1,11 @@
 // Components
-import { Form, Head } from '@inertiajs/react';
-import TextLink from '@/components/text-link';
+import { Form, Head, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { logout } from '@/routes';
 import { send } from '@/routes/verification';
 
 export default function VerifyEmail({ status }: { status?: string }) {
+    const { csrfToken } = usePage<{ csrfToken: string }>().props;
     return (
         <>
             <Head title="Email verification" />
@@ -26,15 +25,13 @@ export default function VerifyEmail({ status }: { status?: string }) {
                             Resend verification email
                         </Button>
 
-                        <TextLink
-                            href={logout()}
-                            className="mx-auto block text-sm"
-                        >
-                            Log out
-                        </TextLink>
                     </>
                 )}
             </Form>
+            <form action="/logout" method="post" className="mt-4 text-center">
+                <input type="hidden" name="_token" value={csrfToken} />
+                <Button type="submit" variant="link">Log out</Button>
+            </form>
         </>
     );
 }

@@ -11,6 +11,7 @@ The application is not approved for live launch. Complete and record these check
 - [ ] Meeting domains/subscription, UTC/timezone schedules, waiting room, consent and reminders verified.
 - [ ] SMTP sender and SPF/DKIM/DMARC, delivery/bounce alerts and recovery checked.
 - [ ] All admin content/media/attendance/reissue workflows validated in browser; outstanding gaps listed in test-report.
+- [ ] Owner authorizes resuming tests; final login/logout, authenticator onboarding, enhanced controls, mobile spacing and light/dark-theme edits are verified. Tests are currently paused.
 - [ ] PDF long names, Unicode repertoire, QR and one-page layout manually verified; embedded DejaVu supports a limited repertoire and is not proof of every Unicode script.
 - [ ] Responsive 360/768/1280/1440, 200% zoom, keyboard and WCAG 2.2 AA manual/automated checks completed.
 - [ ] Production CSP/cookies and no demo/test data confirmed; resolve the four framework advisory records from the Laravel 10 dependency audit and establish an approved security patch strategy.

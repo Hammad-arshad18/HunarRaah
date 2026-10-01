@@ -13,9 +13,11 @@ declare global {
 export default function PrivatePlayer({
     lessonId,
     position,
+    preview = false,
 }: {
     lessonId: number;
     position: number;
+    preview?: boolean;
 }) {
     const frame = useRef<HTMLIFrameElement>(null);
     const player = useRef<StreamPlayer | null>(null);
@@ -27,7 +29,7 @@ export default function PrivatePlayer({
         document.querySelector<HTMLMetaElement>('meta[name=csrf-token]')
             ?.content || '';
     const save = () => {
-        if (!player.current) return;
+        if (!player.current || preview) return;
         lastPosition.current = Math.floor(player.current.currentTime);
         void fetch(`/lessons/${lessonId}/progress`, {
             method: 'POST',
@@ -54,10 +56,18 @@ export default function PrivatePlayer({
     const refresh = async () => {
         setLoading(true);
         try {
-            const r = await fetch(`/lessons/${lessonId}/playback-token`, {
-                method: 'POST',
-                headers: { Accept: 'application/json', 'X-CSRF-TOKEN': csrf() },
-            });
+            const r = await fetch(
+                preview
+                    ? `/admin/lessons/${lessonId}/playback-token`
+                    : `/lessons/${lessonId}/playback-token`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': csrf(),
+                    },
+                },
+            );
             if (!r.ok)
                 throw new Error(
                     'Private playback is unavailable. Check your access or retry.',
@@ -139,8 +149,9 @@ export default function PrivatePlayer({
                 </p>
             )}
             <p className="fine">
-                Progress is saved approximately every 15 seconds. Completion is
-                your self-attestation.
+                {preview
+                    ? 'Administrator preview is audited and does not change learner progress.'
+                    : 'Progress is saved approximately every 15 seconds. Completion is your self-attestation.'}
             </p>
         </section>
     );

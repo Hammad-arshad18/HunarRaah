@@ -28,6 +28,11 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->bind(\Laravel\Fortify\Contracts\LoginResponse::class, \App\Http\AdminLoginResponse::class);
+        $this->app->bind(\Laravel\Fortify\Contracts\TwoFactorLoginResponse::class, \App\Http\AdminLoginResponse::class);
+        $this->app->bind(\Laravel\Fortify\Contracts\PasswordConfirmedResponse::class, \App\Http\AdminPasswordConfirmedResponse::class);
+        $this->app->bind(\Laravel\Fortify\Contracts\LogoutResponse::class, \App\Http\StudioLogoutResponse::class);
+        $this->app->bind(\Filament\Http\Responses\Auth\Contracts\LogoutResponse::class, \App\Http\StudioLogoutResponse::class);
         $this->app->bind(FailedPasswordResetLinkRequestResponse::class, GenericPasswordResetResponse::class);
     }
 

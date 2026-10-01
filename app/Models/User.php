@@ -22,8 +22,13 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements \Filament\Models\Contracts\FilamentUser, MustVerifyEmail
 {
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        return $panel->getId() === 'admin' && $this->role === 'admin' && ! $this->suspended_at && $this->hasVerifiedEmail();
+    }
+
     protected $fillable = ['name', 'email', 'password'];
 
     protected $hidden = ['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'];

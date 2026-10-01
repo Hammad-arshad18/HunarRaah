@@ -24,12 +24,24 @@ class LearningController extends Controller
 {
     public function dashboard(Request $request): Response
     {
-        $enrollments = Enrollment::where('user_id', $request->user()->id)->with('course')->get()->map(fn ($e) => ['id' => $e->id, 'status' => $e->status, 'completed_at' => $e->completed_at, 'course' => ['id' => $e->course->id, 'title' => $e->course->title, 'summary' => $e->course->summary, 'format' => $e->course->format]]);
+        $enrollments = Enrollment::where('user_id', $request->user()->id)->with(['course', 'progress', 'course.modules.lessons'])->latest('updated_at')->get()->map(function ($e) {
+            $required = $e->course->modules->flatMap(fn ($m) => $m->lessons)->where('required', true);
+            $completed = $e->progress->whereNotNull('completed_at')->whereIn('lesson_id', $required->pluck('id'))->count();
+
+            return ['id' => $e->id, 'status' => $e->status, 'completed_at' => $e->completed_at, 'course' => ['id' => $e->course->id, 'title' => $e->course->title, 'summary' => $e->course->summary, 'format' => $e->course->format, 'certificate_enabled' => $e->course->certificate_enabled], 'required_count' => $required->count(), 'completed_count' => $completed];
+        });
 
         $certificates = Certificate::whereHas('enrollment', fn ($q) => $q->where('user_id', $request->user()->id))->whereNotNull('current_enrollment_id')->get()->map(fn ($c) => $c->only('credential_id', 'course_title', 'status'));
         $sessions = LiveSession::where('status', 'scheduled')->where('ends_at', '>', now())->whereHas('lesson.module.course.enrollments', fn ($q) => $q->where('user_id', $request->user()->id)->where('status', 'active'))->with('lesson.module')->orderBy('starts_at')->limit(5)->get()->map(fn ($s) => ['id' => $s->id, 'title' => $s->lesson->title, 'starts_at' => $s->starts_at, 'timezone' => $s->timezone, 'course_id' => $s->lesson->module->course_id, 'lesson_id' => $s->lesson_id]);
 
         return Inertia::render('studio/dashboard', ['enrollments' => $enrollments, 'certificates' => $certificates, 'sessions' => $sessions]);
+    }
+
+    public function schedule(Request $request): Response
+    {
+        $sessions = LiveSession::whereHas('lesson.module.course.enrollments', fn ($q) => $q->where('user_id', $request->user()->id)->where('status', 'active'))->whereHas('lesson', fn ($q) => $q->where('published', true))->with('lesson.module.course')->orderByDesc('starts_at')->paginate(20)->through(fn ($s) => [...$s->only('id', 'starts_at', 'ends_at', 'timezone', 'status', 'message'), 'title' => $s->lesson->title, 'course_title' => $s->lesson->module->course->title, 'course_id' => $s->lesson->module->course_id, 'lesson_id' => $s->lesson_id]);
+
+        return Inertia::render('studio/schedule', ['sessions' => $sessions]);
     }
 
     public function enroll(Request $request, Course $course, GrantEnrollment $action): RedirectResponse
@@ -46,7 +58,8 @@ class LearningController extends Controller
         $course->load(['modules.lessons' => fn ($q) => $q->where('published', true)]);
         $lessons = $course->modules->flatMap(fn ($m) => $m->lessons);
         $progress = $enrollment->progress()->get()->keyBy('lesson_id');
-        $lesson ??= $lessons->first(fn ($l) => ! $progress->get($l->id)?->completed_at) ?? $lessons->first();
+        $recent = $progress->whereNull('completed_at')->sortByDesc('updated_at')->first(fn ($p) => $lessons->contains('id', $p->lesson_id));
+        $lesson ??= $lessons->firstWhere('id', $recent?->lesson_id) ?? $lessons->first(fn ($l) => ! $progress->get($l->id)?->completed_at) ?? $lessons->first();
         abort_unless($lesson && $lessons->contains('id', $lesson->id), 404);
         if (! $request->route('lesson')) {
             return redirect('/learn/'.$course->id.'/'.$lesson->id);
@@ -55,7 +68,7 @@ class LearningController extends Controller
         $required = $lessons->where('required', true);
 
         return Inertia::render('studio/classroom', [
-            'course' => ['id' => $course->id, 'title' => $course->title],
+            'course' => ['id' => $course->id, 'title' => $course->title, 'certificate_enabled' => $course->certificate_enabled, 'recording_alternative' => $course->recording_alternative],
             'enrollment' => ['id' => $enrollment->id, 'completed_at' => $enrollment->completed_at],
             'modules' => $course->modules->map(fn (Module $m): array => ['id' => $m->id, 'title' => $m->title, 'lessons' => $m->lessons->map(fn (Lesson $l): array => ['id' => $l->id, 'title' => $l->title, 'type' => $l->type, 'required' => $l->required, 'complete' => (bool) $progress->get($l->id)?->completed_at])]),
             'lesson' => ['id' => $lesson->id, 'title' => $lesson->title, 'type' => $lesson->type, 'html' => $lesson->type === 'text' ? Str::markdown($lesson->body ?? '', ['html_input' => 'strip', 'allow_unsafe_links' => false]) : null, 'video_status' => $lesson->video_status, 'position_seconds' => $progress->has($lesson->id) ? $progress->get($lesson->id)->position_seconds : 0, 'complete' => (bool) $progress->get($lesson->id)?->completed_at, 'session' => $lesson->session ? $lesson->session->only('id', 'starts_at', 'ends_at', 'timezone', 'status', 'message') : null],

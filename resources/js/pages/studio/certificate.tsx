@@ -66,6 +66,23 @@ export default function CertificatePage({
                         Download PDF
                     </a>
                 )}
+                {c.generation_status === 'failed' && (
+                    <button
+                        className="button secondary"
+                        onClick={() =>
+                            router.post(
+                                `/certificates/${c.credential_id}/retry`,
+                            )
+                        }
+                    >
+                        Retry PDF generation
+                    </button>
+                )}
+                {c.generation_status === 'pending' && (
+                    <p className="note">
+                        Your PDF is being prepared. Refresh to check its status.
+                    </p>
+                )}
                 <section className="section">
                     <h3>Choose what you share.</h3>
                     <p>

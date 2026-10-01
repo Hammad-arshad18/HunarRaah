@@ -12,7 +12,7 @@ class CatalogController extends Controller
 {
     public function home(): View
     {
-        return view('public.home', ['courses' => $this->visible()->limit(3)->get()]);
+        return view('public.home', ['courses' => $this->visible()->with(['modules.lessons' => fn ($q) => $q->where('published', true)->select('id', 'module_id', 'title', 'type', 'position')])->limit(3)->get()]);
     }
 
     /** @return Builder<Course> */

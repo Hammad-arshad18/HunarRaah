@@ -14,15 +14,35 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class MediaController extends Controller
 {
-    public function roster(Lesson $lesson): Response
+    public function previewPlayback(Request $request, Lesson $lesson, StreamGateway $stream): JsonResponse
     {
         Gate::authorize('update', $lesson->module->course);
+        abort_unless($lesson->video_status === 'ready' && $lesson->video_uid, 409, 'Recording is not ready.');
+        $this->audit($request, 'video.previewed', $lesson->id, 'Administrator private recording preview');
 
-        return Inertia::render('studio/roster', ['lesson' => $lesson->only('id', 'title'), 'enrollments' => Enrollment::where('course_id', $lesson->module->course_id)->where('status', 'active')->with('user:id,name')->paginate(20)]);
+        return response()->json(['url' => 'https://iframe.videodelivery.net/'.$stream->token($lesson->video_uid), 'expires_at' => now()->addMinutes(10)->toIso8601String()])->header('Cache-Control', 'no-store, private');
+    }
+
+    public function correction(Request $request, Lesson $lesson, Enrollment $enrollment, CompleteLesson $action): RedirectResponse
+    {
+        Gate::authorize('update', $lesson->module->course);
+        abort_unless($enrollment->course_id === $lesson->module->course_id, 404);
+        $data = $request->validate(['reason' => 'required|string|max:1000', 'completed' => 'required|boolean']);
+        if ($data['completed']) {
+            $action->execute($request->user(), $lesson, 'admin_correction', $data['reason'], $enrollment);
+        } else {
+            DB::transaction(function () use ($request, $lesson, $enrollment, $data) {
+                $locked = Enrollment::whereKey($enrollment->id)->lockForUpdate()->firstOrFail();
+                $locked->progress()->where('lesson_id', $lesson->id)->update(['completed_at' => null, 'completion_source' => null, 'actor_id' => $request->user()->id]);
+                $locked->update(['completed_at' => null]);
+                $this->audit($request, 'lesson.completion_corrected', $lesson->id, $data['reason']);
+            });
+        }
+
+        return back();
     }
 
     public function playback(Request $request, Lesson $lesson, StreamGateway $stream): JsonResponse

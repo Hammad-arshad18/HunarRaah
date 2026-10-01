@@ -11,3 +11,16 @@ Updated 30 September 2026 (Asia/Dubai), at the owner's explicit request.
 Laravel 10 and PHP 8.1 are past upstream security support. Record that operational limitation accurately; do not silently change the owner's requested versions.
 
 - The Laravel 10.50.3 dependency audit reports four framework advisory records. Keep them visible; do not disable auditing or silently claim they are resolved.
+
+- The product must use the custom teaching-studio identity throughout public, authentication, student, settings and administration screens. Do not restore Laravel logos, starter-kit links, documentation navigation or placeholder dashboards.
+- Build real, authorized backend workflows for visible controls; preserve payment integrity, private content, required admin MFA and curriculum locks when expanding the UI.
+
+- Use **Laravel Filament 3** for the entire administrator application, compatible with Laravel 10 and system PHP. Keep public/student pages in their existing Blade/Inertia architecture. Administration sign-in must retain Fortify TOTP and recent-password checks.
+
+- **Tests are paused at the owner's request. Do not run tests or browser validation until the owner explicitly authorizes them again.** Building assets to deliver requested UI changes is permitted; report it separately from testing.
+- Successful password sign-in must count as recent password confirmation. Do not immediately ask administrators to enter the same password again. Keep the required first-time authenticator setup clear and direct at `/admin/setup`.
+- Logout must invalidate the session and navigate to the public home page on the first submission, including transitions between Inertia and Filament. Use a normal CSRF-protected form and full-page redirects where needed.
+- Use enhanced Filament controls and accessible Radix/Tailwind controls instead of browser-style dropdowns. Keep spacing, control heights, typography, colors and menus consistent across public, student, account and admin screens.
+- Light and dark themes must use the shared `public/theme.css` palette and synchronized appearance preference. Inputs need explicit readable text/caret/placeholder/autofill colours; active buttons use solid action colours. Never hide ordinary fields by matching their name to `code`; only the underlying segmented OTP input may be transparent.
+- Keep a compact theme dropdown in the public homepage header with Light / Dark / System choices, sharing the same saved preference as account and administration screens. Avoid a bulky three-button bar.
+- Keep `AGENTS.md`, `RULES.md`, `CLAUDE.md`, `GEMINI.md` and this file in Git. `RULES.md` is the common agent guidance; agent-specific files point to it. Preserve local data and dependencies during cleanup, while excluding them from GitHub.

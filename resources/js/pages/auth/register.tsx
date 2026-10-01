@@ -70,6 +70,10 @@ export default function Register({ passwordRules }: Props) {
                                     passwordrules={passwordRules}
                                 />
                                 <InputError message={errors.password} />
+                                <p className="fine">
+                                    Use at least 12 characters. Password
+                                    managers and paste are welcome.
+                                </p>
                             </div>
 
                             <div className="grid gap-2">
@@ -128,6 +132,7 @@ export default function Register({ passwordRules }: Props) {
 }
 
 Register.layout = {
-    title: 'Create an account',
-    description: 'Enter your details below to create your account',
+    title: 'Make a fresh start.',
+    description:
+        'Your first step toward a new skill. Create your learning account below.',
 };

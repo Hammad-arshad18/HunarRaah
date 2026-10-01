@@ -27,3 +27,35 @@
 4. Private video, live join/attendance and reminders.
 5. Certificate jobs, sharing and revocation.
 6. Deployment/recovery documentation and acceptance evidence.
+
+## Studio redesign and workflow completion — 30 September 2026
+
+At the owner's request, remove the remaining starter identity throughout the product. Use one studio mark, a paper/cobalt editorial auth layout, distinct learner/admin navigation and a structured course editor. Retain accessible, tested authentication primitives beneath the custom visual treatment.
+
+Expose existing business actions through usable screens and add the missing record lists, live schedule, chapter/lesson controls, availability panel, audit viewer, email correction, certificate recovery, admin PDF/recording preview and completion correction. All new admin endpoints retain confirmed TOTP and recent password checks. Hiding sales preserves enrolled access; emergency takedown is a separate decision. Completion corrections preserve historical credentials pending a separate explicit revocation decision.
+
+Browser testing uses an isolated development database on port 8001 and log-only mail. Preserve the owner's configured `.env`, MySQL database and SMTP settings. Random browser fixture administrators are refused outside the isolated SQLite/log configuration. Keep provider readiness truthful; missing keys produce useful unavailable states rather than successful demonstrations.
+
+## Filament administration and sign-in corrections — 1 October 2026
+
+The owner explicitly requested Filament for the entire administrator application. Pin Filament 3.3.55 and Livewire 3.8.10, compatible with Laravel 10.50.3 and the actual system PHP 8.1.25. Keep public Blade and student React/Inertia pages. Enable the system PHP `intl` extension in `C:\xampp\php\php.ini`; its previous configuration is backed up locally. This supersedes any earlier statement that global PHP configuration was unchanged.
+
+Native Filament resources expose the existing validated and audited business actions. Financial records remain read-only apart from reconciliation; curriculum locks and certificate history remain enforced. Use the shared studio identity and Filament's compatible Tailwind assets, enhanced dropdowns/calendars and grouped row actions. Public catalog controls progressively enhance to Radix; React uses Tailwind 4. Keep these two Tailwind builds separate.
+
+Fortify is the only sign-in flow. A successful password/TOTP sign-in stamps recent password confirmation, avoiding an immediate duplicate password prompt. Initial administrators use a focused `/admin/setup` authenticator flow; confirmed TOTP remains required by the specification. Crossing from Inertia to Filament or logging out uses full-page navigation. The admin menu posts to Fortify `/logout`, so expired admin password confirmation cannot block logout. Both Fortify and Filament logout responses return to the public home page.
+
+At the owner's explicit request, a local-only administrator seeder created `admin@mirzalearning.com` in the configured MySQL database with a random password in private storage. It does not send mail, reset an existing account or run in production. Production administrator bootstrap remains the interactive audited CLI.
+
+The owner paused tests during the final authentication/control/spacing corrections. Do not run tests or browser validation until explicitly authorized again. Asset compilation is required to deliver the UI changes and is reported separately.
+
+## Shared light/dark palette — 1 October 2026
+
+Replace competing page-local palettes with `public/theme.css`. Public Blade, React/Tailwind and Filament load the same tokens; `theme.js` synchronizes the existing appearance cookie/local-storage preference and Filament's theme preference before rendering. Use separate action and link colours so solid buttons keep readable white labels while small dark-mode links remain bright enough to read.
+
+Fields explicitly define foreground, caret, placeholder, autofill and focus colours. Disabled controls remain visibly disabled without fading their contents. Ordinary authentication-code fields remain visible; transparent input styling is limited to the underlying segmented OTP input. Preserve intentional paper credential previews and static course artwork independently of the surrounding theme. These changes await owner-authorized testing.
+
+## Repository cleanup and agent guidance — 1 October 2026
+
+At the owner's request, remove unused starter layouts/navigation and one-off local scripts, screenshots, generated browser reports, archived downloads and the obsolete portable PHP/starter copies. Preserve the running application's dependencies and generated assets, local databases, private credentials, PHP configuration backup and historical text reports; these remain ignored. Reusable UI primitives remain available for future work.
+
+Track `AGENTS.md`, `RULES.md`, `CLAUDE.md`, `GEMINI.md` and `MEMORY.MD`. Keep common constraints in `RULES.md` and small entry points for Claude/Gemini so rules do not diverge. Current owner decisions override the original specification's conflicting defaults. Strengthen exclusions for environment variants and database exports. No tests, commit, GitHub push or remote workflow were run during cleanup.

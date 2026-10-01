@@ -34,7 +34,15 @@ const getStoredAppearance = (): Appearance => {
         return 'system';
     }
 
-    return (localStorage.getItem('appearance') as Appearance) || 'system';
+    let stored: string | null = null;
+    try {
+        stored = localStorage.getItem('appearance') || localStorage.getItem('theme');
+    } catch {
+        stored = document.cookie.split('; ').find(cookie => cookie.startsWith('appearance='))?.split('=')[1] || null;
+    }
+    return stored && ['light', 'dark', 'system'].includes(stored)
+        ? stored as Appearance
+        : 'system';
 };
 
 const isDarkMode = (appearance: Appearance): boolean => {
@@ -75,16 +83,28 @@ export function initializeTheme(): void {
         return;
     }
 
-    if (!localStorage.getItem('appearance')) {
-        localStorage.setItem('appearance', 'system');
-        setCookie('appearance', 'system');
-    }
-
     currentAppearance = getStoredAppearance();
+    try {
+        localStorage.setItem('appearance', currentAppearance);
+        localStorage.setItem('theme', currentAppearance);
+    } catch { /* Theme switching also works without persistent browser storage. */ }
+    setCookie('appearance', currentAppearance);
     applyTheme(currentAppearance);
 
     // Set up system theme change listener
     mediaQuery()?.addEventListener('change', handleSystemThemeChange);
+    window.addEventListener('theme-changed', ((event: CustomEvent<Appearance>) => {
+        if (!['light', 'dark', 'system'].includes(event.detail) || currentAppearance === event.detail) return;
+        currentAppearance = event.detail;
+        applyTheme(currentAppearance);
+        notify();
+    }) as EventListener);
+    window.addEventListener('storage', (event) => {
+        if (event.key !== 'appearance' && event.key !== 'theme') return;
+        currentAppearance = getStoredAppearance();
+        applyTheme(currentAppearance);
+        notify();
+    });
 }
 
 export function useAppearance(): UseAppearanceReturn {
@@ -102,12 +122,16 @@ export function useAppearance(): UseAppearanceReturn {
         currentAppearance = mode;
 
         // Store in localStorage for client-side persistence...
-        localStorage.setItem('appearance', mode);
+        try {
+            localStorage.setItem('appearance', mode);
+            localStorage.setItem('theme', mode);
+        } catch { /* Keep the current tab usable when storage is unavailable. */ }
 
         // Store in cookie for SSR...
         setCookie('appearance', mode);
 
         applyTheme(mode);
+        window.dispatchEvent(new CustomEvent('theme-changed', { detail: mode }));
         notify();
     };
 

@@ -58,7 +58,7 @@ test('registration verification learning and private certificate journey', async
     const log = readFileSync('storage/logs/laravel.log', 'utf8');
     const links = [
         ...log.matchAll(
-            /http:\/\/127\.0\.0\.1:8000\/email\/verify\/\d+\/[a-f0-9]+\?expires=\d+&signature=[a-f0-9]+/g,
+            /http:\/\/127\.0\.0\.1:800[01]\/email\/verify\/\d+\/[a-f0-9]+\?expires=\d+&signature=[a-f0-9]+/g,
         ),
     ];
     expect(links.length).toBeGreaterThan(0);

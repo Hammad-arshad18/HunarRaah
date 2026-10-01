@@ -14,14 +14,22 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class AdminOperationsController extends Controller
 {
-    public function index(): Response
+    public function email(Request $request, User $user): RedirectResponse
     {
-        return Inertia::render('studio/operations', ['students' => User::where('role', 'student')->select('id', 'name', 'email', 'suspended_at')->paginate(20), 'orders' => Order::latest()->paginate(20), 'enrollments' => Enrollment::with(['user:id,name', 'course:id,title'])->latest()->paginate(20), 'certificates' => Certificate::select('id', 'credential_id', 'learner_name', 'course_title', 'status')->latest()->paginate(20), 'courses' => Course::select('id', 'title')->get()]);
+        abort_unless($user->role === 'student', 403);
+        $data = $request->validate(['email' => ['required', 'email:rfc', 'not_regex:/[\x00-\x20\x7f]/', 'max:255', \Illuminate\Validation\Rule::unique('users')->ignore($user->id)], 'reason' => 'required|string|max:1000']);
+        DB::transaction(function () use ($request, $user, $data) {
+            $u = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $u->forceFill(['email' => strtolower($data['email']), 'email_verified_at' => null, 'remember_token' => Str::random(60)])->save();
+            DB::table('sessions')->where('user_id', $u->id)->delete();
+            $this->audit($request, 'user.email_corrected', 'user', $u->id, $data['reason']);
+            DB::afterCommit(fn () => $u->sendEmailVerificationNotification());
+        });
+
+        return back()->with('toast', ['type' => 'success', 'message' => 'Email corrected. The learner must verify the new address.']);
     }
 
     public function suspend(Request $request, User $user): RedirectResponse
@@ -29,7 +37,7 @@ class AdminOperationsController extends Controller
         $data = $request->validate(['suspended' => 'required|boolean', 'reason' => 'required|string|max:1000']);
         abort_unless($user->role === 'student', 403);
         DB::transaction(function () use ($request, $user, $data) {
-            $user->update(['suspended_at' => $data['suspended'] ? now() : null]);
+            $user->forceFill(['suspended_at' => $data['suspended'] ? now() : null])->save();
             $user->forceFill(['remember_token' => Str::random(60)])->save();
             DB::table('sessions')->where('user_id', $user->id)->delete();
             $this->audit($request, 'user.suspension', 'user', $user->id, $data['reason']);

@@ -30,6 +30,12 @@ class Enrollment extends Model
         return $this->belongsTo(User::class);
     }
 
+    /** @return HasMany<Certificate> */
+    public function certificates(): HasMany
+    {
+        return $this->hasMany(Certificate::class);
+    }
+
     /** @return HasMany<LessonProgress> */
     public function progress(): HasMany
     {

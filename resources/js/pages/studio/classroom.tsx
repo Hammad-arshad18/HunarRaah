@@ -1,4 +1,5 @@
 import { Link, router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import PrivatePlayer from '@/components/private-player';
 import StudioShell from '@/components/studio-shell';
 type Lesson = {
@@ -36,19 +37,32 @@ export default function Classroom({
     progress,
     enrollment,
 }: {
-    course: { id: number; title: string };
+    course: {
+        id: number;
+        title: string;
+        certificate_enabled: boolean;
+        recording_alternative: boolean;
+    };
     lesson: Lesson;
     modules: Module[];
     progress: { completed: number; required: number };
     enrollment: { id: number; completed_at: string | null };
 }) {
+    const [navOpen, setNavOpen] = useState(false);
     const complete = useForm({ confirmed: false });
     const all = modules.flatMap((m) => m.lessons);
     const index = all.findIndex((l) => l.id === lesson.id);
     return (
         <StudioShell title={lesson.title}>
+            <button
+                className="button secondary mobile-lessons"
+                aria-expanded={navOpen}
+                onClick={() => setNavOpen(!navOpen)}
+            >
+                Your learning path {navOpen ? '−' : '+'}
+            </button>
             <div className="classroom">
-                <aside className="lesson-nav">
+                <aside className={`lesson-nav ${navOpen ? 'is-open' : ''}`}>
                     <p className="eyebrow">Your learning path</p>
                     <h3>{course.title}</h3>
                     <p>
@@ -69,6 +83,7 @@ export default function Classroom({
                                 <Link
                                     key={l.id}
                                     href={`/learn/${course.id}/${l.id}`}
+                                    onClick={() => setNavOpen(false)}
                                     aria-current={
                                         l.id === lesson.id ? 'page' : undefined
                                     }
@@ -134,6 +149,19 @@ export default function Classroom({
                             )}
                             <button
                                 className="button"
+                                disabled={
+                                    lesson.session.status !== 'scheduled' ||
+                                    Date.now() <
+                                        new Date(
+                                            lesson.session.starts_at,
+                                        ).getTime() -
+                                            15 * 60 * 1000 ||
+                                    Date.now() >
+                                        new Date(
+                                            lesson.session.ends_at,
+                                        ).getTime() +
+                                            30 * 60 * 1000
+                                }
                                 onClick={() =>
                                     router.post(
                                         `/live-sessions/${lesson.session!.id}/join`,
@@ -150,6 +178,13 @@ export default function Classroom({
                     )}
                     {lesson.complete ? (
                         <p className="note">Lesson completed.</p>
+                    ) : lesson.type === 'live' &&
+                      (!course.recording_alternative ||
+                          lesson.video_status !== 'ready') ? (
+                        <p className="note">
+                            Completion is recorded by the teaching team after
+                            verified attendance.
+                        </p>
                     ) : (
                         <form
                             onSubmit={(e) => {
@@ -202,7 +237,7 @@ export default function Classroom({
                             </Link>
                         )}
                     </nav>
-                    {enrollment.completed_at && (
+                    {enrollment.completed_at && course.certificate_enabled && (
                         <div className="section">
                             <h3>A chapter completed.</h3>
                             <button

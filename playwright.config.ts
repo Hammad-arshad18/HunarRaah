@@ -8,7 +8,11 @@ export default defineConfig({
         ['list'],
         ['html', { open: 'never', outputFolder: '.tools/playwright-report' }],
     ],
-    use: { baseURL: 'http://127.0.0.1:8000', trace: 'retain-on-failure' },
+    use: {
+        actionTimeout: 15000,
+        baseURL: process.env.BROWSER_BASE_URL || 'http://127.0.0.1:8000',
+        trace: 'retain-on-failure',
+    },
     projects: [
         {
             name: 'desktop',

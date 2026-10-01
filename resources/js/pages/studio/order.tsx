@@ -9,8 +9,13 @@ type Order = {
     total_minor: number;
     currency: string;
     course_id: number;
+    has_access: boolean;
+    refunded_minor: number;
 };
 export default function OrderPage({ order }: { order: Order }) {
+    const [hasAccess, setHasAccess] = useState(order.has_access);
+    const [refunded, setRefunded] = useState(order.refunded_minor);
+    const [dispute, setDispute] = useState(order.dispute_status);
     const [status, setStatus] = useState(order.payment_status);
     const [polling, setPolling] = useState(status === 'pending');
     const [networkError, setNetworkError] = useState(false);
@@ -29,6 +34,9 @@ export default function OrderPage({ order }: { order: Order }) {
                 const data = await result.json();
                 if (cancelled) return;
                 setStatus(data.payment_status);
+                setHasAccess(data.has_access);
+                setRefunded(data.refunded_minor);
+                setDispute(data.dispute_status);
                 if (data.payment_status !== 'pending') {
                     setPolling(false);
                     return;
@@ -70,16 +78,23 @@ export default function OrderPage({ order }: { order: Order }) {
                         reload.
                     </p>
                 )}
-                {status === 'paid' &&
-                !['open', 'lost'].includes(order.dispute_status) ? (
+                {refunded > 0 && (
+                    <p>
+                        Refunded: {order.currency} {(refunded / 100).toFixed(2)}
+                    </p>
+                )}
+                {dispute !== 'none' && <p>Dispute status: {dispute}</p>}
+                {hasAccess ? (
                     <Link className="button" href={`/learn/${order.course_id}`}>
                         Open classroom →
                     </Link>
                 ) : (
                     <p className="note">
-                        Access is granted only after payment confirmation. If
-                        you were charged, avoid another payment. Contact support
-                        with this reference.
+                        {status === 'paid'
+                            ? 'Payment is recorded. Course access may be restricted by a refund, dispute or administrator decision. '
+                            : 'Access is granted only after payment confirmation. '}
+                        If you were charged, avoid another payment. Contact
+                        support with this reference.
                     </p>
                 )}
                 <div className="actions">

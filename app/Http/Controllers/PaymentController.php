@@ -17,6 +17,11 @@ use Stripe\Webhook;
 
 class PaymentController extends Controller
 {
+    public function index(Request $request): Response
+    {
+        return Inertia::render('studio/purchases', ['orders' => Order::where('user_id', $request->user()->id)->select('public_reference', 'title_snapshot', 'payment_status', 'dispute_status', 'total_minor', 'refunded_minor', 'currency', 'created_at')->latest()->paginate(20)]);
+    }
+
     public function checkout(Request $request, Course $course, CreateCourseCheckout $action): \Symfony\Component\HttpFoundation\Response
     {
         return Inertia::location($action->execute($request->user(), $course));
@@ -26,10 +31,10 @@ class PaymentController extends Controller
     {
         $order = Order::where('public_reference', $reference)->where('user_id', $request->user()->id)->firstOrFail();
         if ($request->expectsJson() && ! $request->header('X-Inertia')) {
-            return response()->json($order->only('public_reference', 'payment_status', 'dispute_status'))->header('Cache-Control', 'no-store');
+            return response()->json([...$order->only('public_reference', 'payment_status', 'dispute_status', 'refunded_minor'), 'has_access' => app(\App\Services\Entitlement::class)->forCourse($request->user(), $order->course) !== null])->header('Cache-Control', 'no-store');
         }
 
-        return Inertia::render('studio/order', ['order' => $order->only('public_reference', 'payment_status', 'dispute_status', 'title_snapshot', 'total_minor', 'currency', 'course_id')]);
+        return Inertia::render('studio/order', ['order' => [...$order->only('public_reference', 'payment_status', 'dispute_status', 'title_snapshot', 'total_minor', 'refunded_minor', 'currency', 'course_id'), 'has_access' => app(\App\Services\Entitlement::class)->forCourse($request->user(), $order->course) !== null]]);
     }
 
     public function webhook(Request $request): \Illuminate\Http\Response|JsonResponse

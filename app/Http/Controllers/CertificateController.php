@@ -7,6 +7,7 @@ use App\Models\Certificate;
 use App\Models\Enrollment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,6 +15,29 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CertificateController extends Controller
 {
+    public function index(Request $request): Response
+    {
+        return Inertia::render('studio/credentials', ['certificates' => Certificate::whereHas('enrollment', fn ($q) => $q->where('user_id', $request->user()->id))->whereNotNull('current_enrollment_id')->select('credential_id', 'course_title', 'status', 'generation_status', 'issued_at')->latest()->paginate(20), 'eligible' => Enrollment::where('user_id', $request->user()->id)->where('status', 'active')->whereNotNull('completed_at')->whereHas('course', fn ($q) => $q->where('certificate_enabled', true))->whereDoesntHave('certificates', fn ($q) => $q->whereNotNull('current_enrollment_id'))->with('course:id,title')->get()->map(fn ($e) => ['id' => $e->id, 'title' => $e->course->title])]);
+    }
+
+    public function retry(Request $request, string $credential): RedirectResponse
+    {
+        $c = $this->owned($request, $credential);
+        abort_unless($c->generation_status === 'failed', 409, 'Only failed generation can be retried.');
+        $c->update(['generation_status' => 'pending']);
+        \App\Jobs\GenerateCertificate::dispatch($c->id);
+
+        return back();
+    }
+
+    public function adminDownload(Certificate $certificate): StreamedResponse
+    {
+        abort_unless($certificate->generation_status === 'ready' && $certificate->private_pdf_path, 409, 'PDF generation is pending.');
+        DB::table('audit_logs')->insert(['actor_id' => auth()->id(), 'action' => 'certificate.downloaded', 'subject_type' => 'certificate', 'subject_id' => $certificate->id, 'created_at' => now()]);
+
+        return Storage::disk('local')->download($certificate->private_pdf_path, 'certificate-'.$certificate->credential_id.'.pdf', ['Cache-Control' => 'no-store, private']);
+    }
+
     public function issue(Request $request, Enrollment $enrollment, IssueCertificate $action): RedirectResponse
     {
         $c = $action->execute($request->user(), $enrollment);

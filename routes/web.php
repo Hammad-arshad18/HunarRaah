@@ -11,6 +11,12 @@ use App\Http\Controllers\PaymentController;
 use App\Models\Course;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/admin/setup', \App\Http\Controllers\AdminSetupController::class)->middleware(['auth', 'verified', 'password.confirm'])->name('admin.setup');
+Route::get('/admin/login', function (\Illuminate\Http\Request $request) {
+    $request->session()->put('url.intended', url('/admin'));
+
+    return redirect()->route('login');
+});
 Route::get('/', [CatalogController::class, 'home'])->name('home');
 Route::get('/up', fn () => response()->json(['status' => 'ok']));
 Route::get('/sitemap.xml', fn () => response()->view('public.sitemap', ['courses' => Course::where('status', 'published')->where('sales_visible', true)->whereNull('takedown_reason')->select('slug')->get()])->header('Content-Type', 'application/xml'));
@@ -23,6 +29,10 @@ foreach (['terms', 'privacy', 'refund-policy', 'support'] as $page) {
 }
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/purchases', [PaymentController::class, 'index']);
+    Route::get('/credentials', [CertificateController::class, 'index']);
+    Route::get('/schedule', [LearningController::class, 'schedule']);
+    Route::post('/certificates/{credential}/retry', [CertificateController::class, 'retry'])->middleware('throttle:3,1');
     Route::get('/dashboard', [LearningController::class, 'dashboard'])->name('dashboard');
     Route::post('/courses/{course}/checkout', [PaymentController::class, 'checkout'])->middleware('throttle:10,1');
     Route::get('/orders/{reference}', [PaymentController::class, 'show']);
@@ -37,22 +47,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/lessons/{lesson}/complete', [LearningController::class, 'complete'])->middleware('throttle:30,1');
     Route::post('/lessons/{lesson}/progress', [LearningController::class, 'position'])->middleware('throttle:60,1');
     Route::prefix('admin')->middleware(['admin', 'password.confirm'])->group(function () {
-        Route::get('/courses', [AdminCourseController::class, 'index']);
-        Route::get('/operations', [AdminOperationsController::class, 'index']);
+        Route::redirect('/activity', '/admin/audit-logs');
+        Route::put('/students/{user}/email', [AdminOperationsController::class, 'email']);
+        Route::get('/certificates/{certificate}/download', [CertificateController::class, 'adminDownload']);
+        Route::redirect('/operations', '/admin/students');
         Route::post('/students/{user}/suspension', [AdminOperationsController::class, 'suspend']);
         Route::post('/courses/{course}/grant', [AdminOperationsController::class, 'grant']);
         Route::post('/enrollments/{enrollment}/restriction', [AdminOperationsController::class, 'restrict']);
         Route::post('/orders/{order}/reconcile', [AdminOperationsController::class, 'reconcile']);
         Route::post('/certificates/{certificate}/revoke', [AdminOperationsController::class, 'revoke']);
         Route::post('/certificates/{certificate}/reissue', [AdminOperationsController::class, 'reissue']);
+        Route::post('/lessons/{lesson}/playback-token', [MediaController::class, 'previewPlayback'])->middleware('throttle:20,1');
+        Route::post('/lessons/{lesson}/completion/{enrollment}', [MediaController::class, 'correction']);
         Route::post('/lessons/{lesson}/video', [MediaController::class, 'attach']);
-        Route::get('/lessons/{lesson}/roster', [MediaController::class, 'roster']);
+        Route::get('/lessons/{lesson}/roster', fn (\App\Models\Lesson $lesson) => redirect('/admin/enrollments?tableFilters[course_id][value]='.$lesson->module->course_id));
         Route::post('/lessons/{lesson}/session', [MediaController::class, 'schedule']);
         Route::post('/lessons/{lesson}/attendance/{enrollment}', [MediaController::class, 'attendance']);
-        Route::get('/courses/{course}/edit', [AdminCourseController::class, 'edit']);
         Route::post('/courses', [AdminCourseController::class, 'store']);
         Route::post('/courses/{course}/image', [CourseImageController::class, 'store']);
         Route::put('/courses/{course}', [AdminCourseController::class, 'update']);
+        Route::put('/courses/{course}/modules/{module}', [AdminCourseController::class, 'reviseModule']);
+        Route::delete('/courses/{course}/modules/{module}', [AdminCourseController::class, 'removeModule']);
+        Route::delete('/courses/{course}/lessons/{lesson}', [AdminCourseController::class, 'removeLesson']);
+        Route::post('/courses/{course}/availability', [AdminCourseController::class, 'availability']);
         Route::post('/courses/{course}/modules', [AdminCourseController::class, 'module']);
         Route::post('/courses/{course}/modules/{module}/lessons', [AdminCourseController::class, 'lesson']);
         Route::post('/courses/{course}/publish', [AdminCourseController::class, 'publish']);

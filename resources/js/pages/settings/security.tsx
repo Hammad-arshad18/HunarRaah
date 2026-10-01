@@ -15,6 +15,7 @@ import ManageTwoFactor from '@/components/manage-two-factor';
 // oxfmt-ignore
 type Props = {
     passwordRules: string;
+    adminSetup?: boolean;
 } /* @chisel-2fa */ &
     ManageTwoFactorProps /* @end-chisel-2fa */;
 
@@ -27,6 +28,21 @@ export default function Security(props: Props) {
             <Head title="Security settings" />
 
             <h1 className="sr-only">Security settings</h1>
+            {props.adminSetup && (
+                <div className="notice" role="status">
+                    <strong>Administrator access</strong>
+                    <p>
+                        Enable and confirm your authenticator below to open the
+                        teaching desk. Save your recovery codes in your password
+                        manager.
+                    </p>
+                    {props.twoFactorEnabled && (
+                        <a className="btn" href="/admin">
+                            Continue to administration →
+                        </a>
+                    )}
+                </div>
+            )}
 
             <div className="space-y-6">
                 <Heading

@@ -18,6 +18,8 @@ Restore into an isolated staging environment: decrypt backup, create empty MySQL
 
 ## Account requests
 
+The initial local administrator was created with the owner-requested `AdministratorSeeder`. Credentials are in private `storage/app/private/admin-bootstrap.txt`; reruns preserve the password. This is a local-only exception. Production administrators are created/promoted through the controlled CLI. Connect and confirm an authenticator at `/admin/setup` and keep recovery codes securely. A fresh successful sign-in counts as password confirmation. Recover lost authenticators through recovery codes and owner identity review; do not bypass MFA through a public endpoint.
+
 Verify identity via established support channels before email changes, exports or deletion. Paid/learned accounts use support review because financial/credential retention needs a legal/business decision. Preserve required financial facts and audit history; anonymize only approved data, remove sessions, disable public certificate sharing and handle retained credential identity under owner policy. Do not silently change certificate snapshots on profile updates. Email changes must clear verification, invalidate sessions and send fresh verification. Admin role creation stays CLI-controlled.
 
 ## Access incident

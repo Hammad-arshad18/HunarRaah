@@ -16,6 +16,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 type PageComponent = ComponentType & {
     layout?: Record<string, unknown> | ((page: ReactElement) => ReactNode);
 };
+const layouts = new WeakSet<PageComponent>();
 const pages = import.meta.glob<{ default: PageComponent }>('./pages/**/*.tsx');
 const appName = import.meta.env.VITE_APP_NAME || 'Teaching Studio';
 void createInertiaApp({
@@ -24,6 +25,8 @@ void createInertiaApp({
         const load = pages[`./pages/${name}.tsx`];
         if (!load) throw new Error(`Unknown application page: ${name}`);
         const page = (await load()).default;
+        if (layouts.has(page)) return page;
+        layouts.add(page);
         const metadata = typeof page.layout === 'object' ? page.layout : {};
         if (name.startsWith('auth/')) {
             page.layout = (child) => (

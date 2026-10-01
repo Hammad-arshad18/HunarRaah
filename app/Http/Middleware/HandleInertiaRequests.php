@@ -39,7 +39,8 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'name' => config('app.name'),
             'organization' => config('platform.organization'),
-            'flash' => ['toast' => fn () => $request->session()->get('toast')],
+            'csrfToken' => csrf_token(),
+            'flash' => ['operation_error' => fn () => $request->session()->get('operation_error'), 'toast' => fn () => $request->session()->get('toast')],
             'auth' => [
                 'user' => $request->user()?->only('id', 'name', 'email', 'email_verified_at', 'role'),
             ],

@@ -12,9 +12,10 @@
 /.tools
 /test-results
 /database/*.sqlite*
-/GEMINI.md
 .DS_Store
 .env
+.env.*
+!.env.example
 .env.backup
 .env.production
 .phpactor.json
@@ -39,8 +40,19 @@ yarn-error.log
 /.kiro
 /.pi
 /.mcp.json
-/AGENTS.md
-/CLAUDE.md
 /boost.json
 /opencode.json
 /opencode.jsonc
+
+/public/css/filament/
+/public/js/filament/
+
+# Local databases, exports, coverage and private development artifacts.
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sql
+*.sql.gz
+/backups/
+/coverage/
+/playwright-report/

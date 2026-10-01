@@ -23,6 +23,7 @@ class SecurityController extends Controller
             'canManageTwoFactor' => Features::canManageTwoFactorAuthentication(),
             /* @end-chisel-2fa */
             'passwordRules' => 'minlength:12; maxlength:128',
+            'adminSetup' => $request->user()->role === 'admin',
         ];
 
         /* @chisel-2fa */
