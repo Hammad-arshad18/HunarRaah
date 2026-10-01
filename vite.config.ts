@@ -7,7 +7,7 @@ import { defineConfig, lazyPlugins } from 'vite-plus';
 export default defineConfig({
     plugins: lazyPlugins(() => [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx', 'resources/js/public.tsx'],
+            input: ['resources/css/app.css', 'resources/js/app.tsx', 'resources/js/public.tsx', 'resources/js/home.ts'],
             refresh: true,
         }),
         react(),

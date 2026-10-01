@@ -39,6 +39,16 @@ Open `/admin` and sign in. First-time access opens `/admin/setup` to connect and
 
 In production, create an administrator interactively using `php artisan platform:admin`. There is no public administrator signup or production demo password. Bootstrap and promotion operations are audited.
 
+## Homepage motion
+
+The homepage progressively enhances a static illustration with Three.js 0.186.1. `resources/js/home.ts` loads the scene only near the viewport; `resources/js/scenes/learning-studio.ts` owns rendering and cleanup, and `resources/css/home-scene.css` owns its responsive layout. The Blade curriculum preview remains server-rendered. Rebuild with `pnpm run build` after edits.
+
+The illustration follows the shared theme and provides drag, keyboard-accessible rotation and play/pause controls. Reduced-motion starts paused. Data-saving connections, blocked downloads and unavailable/lost WebGL retain the static artwork. No remote models, textures, CDN or additional CSP permissions are required. Browser/device verification remains paused; see `docs/test-report.md`.
+
+The complete homepage uses `resources/js/home-scroll.ts` and `resources/css/home-scroll.css` for scroll-driven 3D movement, the statement section, a sticky chapter sequence, staggered content reveals and the closing illustration. Native scrolling is preserved. The page motion switch pauses decorative movement and saves that choice for the tab; system reduced-motion disables it automatically. Content is visible by default, keyboard focus cancels reveals, and sticky storytelling becomes normal document flow on narrow or short screens. No additional animation package is needed.
+
+The learning path also has a moving marker and native chapter jump links. A decorative word ribbon follows scroll position. Fine mouse pointers add restrained course-art tilt/highlights and local spotlights; these effects reset on pointer exit, keyboard focus, hidden tabs and motion-off. Touch interaction retains normal scrolling and links.
+
 ## Checks
 
 **Do not execute these checks until the owner lifts the current testing pause.** An asset build is separate from tests.
