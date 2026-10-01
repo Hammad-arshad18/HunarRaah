@@ -16,7 +16,7 @@ Ship `public/theme.css` and `public/theme.js` with every release. All three appl
 
 Store `.env` and `storage/` outside immutable releases and symlink them. Generate APP_KEY once and preserve it in encrypted recovery storage. Set APP_ENV=production, APP_DEBUG=false, APP_URL=https://owner-domain, SESSION_SECURE_COOKIE=true, SESSION_ENCRYPT=true, database cache/session/queue drivers and transactional SMTP. Configure owner organization/issuer/signatory/support/currency/timezone. Never expose secrets as VITE variables.
 
-Run `composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader` from lockfile. Build `pnpm install --frozen-lockfile && pnpm run build` in CI and ship public/build plus public/fonts and license. Configure writable storage/bootstrap cache permissions for deploy and FPM users, never world-writable.
+Run `composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader` from lockfile. On a trusted build machine, run `pnpm install --frozen-lockfile` followed by `pnpm run build`, then ship public/build plus public/fonts and license. GitHub Actions CI/CD is currently removed at the owner's request; releases are manual. Configure writable storage/bootstrap cache permissions for deploy and FPM users, never world-writable.
 
 Run `php artisan migrate --force`, `php artisan storage:link`, `php artisan platform:admin` interactively, then `php artisan config:cache`, `php artisan route:cache`, `php artisan view:cache`. Start worker service from `deploy/queue.service` and cron scheduler. Do not run development seeders or copy local SQLite/users into production.
 

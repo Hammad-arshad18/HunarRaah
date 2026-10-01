@@ -10,7 +10,7 @@ All agents must start with [RULES.md](RULES.md), [MEMORY.MD](MEMORY.MD) and [AGE
 
 Commit application source, migrations, tests, deployment configuration, documentation, agent instructions, `.env.example`, `composer.lock` and `pnpm-lock.yaml`. Local `.env` variants, credentials/private storage, databases/SQL exports, `.tools`, test reports, `vendor`, `node_modules`, generated Filament assets and Vite builds are excluded. Do not force-add ignored local files.
 
-The installed dependencies and built assets remain on the owner's machine so the application can keep running. A fresh clone recreates them using the setup instructions below. The existing GitHub workflow runs checks on pull requests and pushes to `main`; no GitHub push or workflow run was performed during cleanup.
+The installed dependencies and built assets remain on the owner's machine so the application can keep running. A fresh clone recreates them using the setup instructions below. GitHub Actions CI/CD is removed at the owner's request. Local Laravel tests and manual check commands remain available; do not restore workflows without the owner's instruction. Test execution is still paused.
 
 ## Requirements
 

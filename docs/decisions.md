@@ -1,5 +1,9 @@
 # Implementation decisions
 
+## GitHub Actions removed — 1 October 2026
+
+The owner requested removing GitHub Actions CI/CD for now. Remove the tests workflow and the Dependabot configuration that only updated GitHub Actions. Keep local PHPUnit tests, Composer check commands and manual deployment configuration. Update deployment instructions to build assets on a trusted build machine. Add public-discovery regression tests for unavailable courses, unpublished/protected lesson data and closed enrollment remaining publicly discoverable. The owner permitted adding tests; the existing pause on executing tests remains in force. No GitHub settings, remote workflows, commits or pushes were changed.
+
 ## 2026-09-30 — owner version instruction
 
 - The owner explicitly requested Laravel 10 and the existing system PHP, superseding the original Laravel 13/portable PHP decision. Preferences are saved in `MEMORY.MD`.
